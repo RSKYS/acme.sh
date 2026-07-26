@@ -3247,13 +3247,13 @@ _initpath() {
     CERT_KEY_PATH="$DOMAIN_PATH/$domain.key"
   fi
   if [ -z "$CERT_PATH" ]; then
-    CERT_PATH="$DOMAIN_PATH/$domain.cer"
+    CERT_PATH="$DOMAIN_PATH/$domain.crt"
   fi
   if [ -z "$CA_CERT_PATH" ]; then
-    CA_CERT_PATH="$DOMAIN_PATH/ca.cer"
+    CA_CERT_PATH="$DOMAIN_PATH/$domain.ca"
   fi
   if [ -z "$CERT_FULLCHAIN_PATH" ]; then
-    CERT_FULLCHAIN_PATH="$DOMAIN_PATH/fullchain.cer"
+    CERT_FULLCHAIN_PATH="$DOMAIN_PATH/$domain.pem"
   fi
   if [ -z "$CERT_PFX_PATH" ]; then
     CERT_PFX_PATH="$DOMAIN_PATH/$domain.pfx"
@@ -6069,6 +6069,15 @@ $_authorizations_map"
     _err "Error calling hook."
     return 1
   fi
+
+# Remove temporary CSR artifacts only after the complete issuance workflow
+# has succeeded and the final certificate is still present and valid.
+
+  if rm -f "$CSR_PATH" "$DOMAIN_SSL_CONF"; then
+    _debug "Removed temporary CSR files: $CSR_PATH $DOMAIN_SSL_CONF"
+  fi
+
+  return 0
 }
 
 #in_out_cert   out_fullchain   out_ca
